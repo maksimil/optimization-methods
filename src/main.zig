@@ -1,27 +1,157 @@
 const config = @import("config.zig");
 const nelder_mead = @import("nelder_mead.zig");
+const gradient_descent = @import("gradient_descent.zig");
 
-const Vec2 = config.Vec2;
 const Scalar = config.Scalar;
+const Vec2 = config.Vec2;
+const Mat2 = config.Mat2;
 
 const kInitialPoint: Vec2 = .{ 10, 20 };
 
-fn WrapFn(comptime f: anytype) type {
-    return struct {
-        pub fn call(x: Vec2) Scalar {
-            return f(x);
-        }
-    };
+fn LogResult(
+    x: Vec2,
+    f: Scalar,
+    grad1: Scalar,
+    nfcalls: usize,
+    ngcalls: usize,
+    nhcalls: usize,
+) !void {
+    try config.stdout.print(
+        "x={{ {e:11.4}, {e:11.4} }}, f(x)={e:11.4}, grad1(x)={e:11.4}\n" ++
+            "fcalls={d:8}, gcalls={d:8}, hcalls={d:8}\n\n",
+        .{ x[0], x[1], f, grad1, nfcalls, ngcalls, nhcalls },
+    );
 }
 
 pub fn main() !void {
     config.RuntimeInitialize();
     defer config.RuntimeDeinitialize();
 
+    // --- Functions ---
+    var nfcalls: usize = 0;
+    var ngcalls: usize = 0;
+    var nhcalls: usize = 0;
+
+    const f1 = struct {
+        ncalls: *usize,
+
+        pub fn call(this: @This(), x: Vec2) Scalar {
+            this.ncalls.* += 1;
+            return config.TaskF1(x);
+        }
+    }{ .ncalls = &nfcalls };
+
+    const f2 = struct {
+        ncalls: *usize,
+
+        pub fn call(this: @This(), x: Vec2) Scalar {
+            this.ncalls.* += 1;
+            return config.TaskF2(x);
+        }
+    }{ .ncalls = &nfcalls };
+
+    const g1 = struct {
+        ncalls: *usize,
+
+        pub fn call(this: @This(), x: Vec2) Vec2 {
+            this.ncalls.* += 1;
+            return config.GradF1(x);
+        }
+    }{ .ncalls = &ngcalls };
+
+    const g2 = struct {
+        ncalls: *usize,
+
+        pub fn call(this: @This(), x: Vec2) Vec2 {
+            this.ncalls.* += 1;
+            return config.GradF2(x);
+        }
+    }{ .ncalls = &ngcalls };
+
+    const h1 = struct {
+        ncalls: *usize,
+
+        pub fn call(this: @This(), x: Vec2) Mat2 {
+            this.ncalls.* += 1;
+            return config.HessF1(x);
+        }
+    }{ .ncalls = &nhcalls };
+
+    const h2 = struct {
+        ncalls: *usize,
+
+        pub fn call(this: @This(), x: Vec2) Mat2 {
+            this.ncalls.* += 1;
+            return config.HessF2(x);
+        }
+    }{ .ncalls = &nhcalls };
+
+    _ = h1;
+    _ = h2;
+
     // --- Nelder-Mead method ---
-    const res = nelder_mead.Optimize(WrapFn(config.TaskF1), kInitialPoint);
-    try config.stdout.print(
-        "x={any}, f(x)={e}\n",
-        .{ res, config.TaskF1(res) },
-    );
+    {
+        const res = nelder_mead.Optimize(f1, kInitialPoint);
+
+        try LogResult(
+            res,
+            config.TaskF1(res),
+            config.Norm1(config.GradF1(res)),
+            nfcalls,
+            ngcalls,
+            nhcalls,
+        );
+        nfcalls = 0;
+        ngcalls = 0;
+        nhcalls = 0;
+    }
+
+    {
+        const res = nelder_mead.Optimize(f2, kInitialPoint);
+
+        try LogResult(
+            res,
+            config.TaskF2(res),
+            config.Norm1(config.GradF2(res)),
+            nfcalls,
+            ngcalls,
+            nhcalls,
+        );
+        nfcalls = 0;
+        ngcalls = 0;
+        nhcalls = 0;
+    }
+
+    // --- Gradient descent method ---
+    {
+        const res = gradient_descent.Optimize(f1, g1, kInitialPoint);
+
+        try LogResult(
+            res,
+            config.TaskF1(res),
+            config.Norm1(config.GradF1(res)),
+            nfcalls,
+            ngcalls,
+            nhcalls,
+        );
+        nfcalls = 0;
+        ngcalls = 0;
+        nhcalls = 0;
+    }
+
+    {
+        const res = gradient_descent.Optimize(f2, g2, kInitialPoint);
+
+        try LogResult(
+            res,
+            config.TaskF2(res),
+            config.Norm1(config.GradF2(res)),
+            nfcalls,
+            ngcalls,
+            nhcalls,
+        );
+        nfcalls = 0;
+        ngcalls = 0;
+        nhcalls = 0;
+    }
 }

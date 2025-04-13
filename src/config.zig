@@ -33,6 +33,10 @@ pub fn Sqr(x: Scalar) Scalar {
 pub const Vec2 = [2]Scalar;
 pub const Mat2 = [2][2]Scalar;
 
+pub fn Norm1(x: Vec2) Scalar {
+    return @abs(x[0]) + @abs(x[1]);
+}
+
 pub fn TaskF1(x: Vec2) Scalar {
     return 100 * Sqr(x[1] - Sqr(x[0])) + 5 * Sqr(1 - x[0]);
 }

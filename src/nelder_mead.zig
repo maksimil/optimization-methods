@@ -7,7 +7,7 @@ const Scalar = config.Scalar;
 const kDelt0: Scalar = 1e-2;
 const kDelt1: Scalar = 1e-1;
 const kIterMax: usize = 1000;
-const kXTol: Scalar = 1e-8;
+const kXTol: Scalar = 1e-10;
 
 fn ModifyCoord(x: Scalar) Scalar {
     if (x >= 0) {
