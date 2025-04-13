@@ -2,6 +2,7 @@ const config = @import("config.zig");
 const nelder_mead = @import("nelder_mead.zig");
 const gradient_descent = @import("gradient_descent.zig");
 const conjugate_gradient = @import("conjugate_gradient.zig");
+const newton = @import("newton.zig");
 
 const Scalar = config.Scalar;
 const Vec2 = config.Vec2;
@@ -86,9 +87,6 @@ pub fn main() !void {
             return config.HessF2(x);
         }
     }{ .ncalls = &nhcalls };
-
-    _ = h1;
-    _ = h2;
 
     // --- Nelder-Mead method ---
     try config.stdout.print("\x1B[34mNelder-Mead\x1B[0m\n", .{});
@@ -178,6 +176,40 @@ pub fn main() !void {
 
     {
         const res = conjugate_gradient.Optimize(f2, g2, kInitialPoint);
+
+        try LogResult(
+            res,
+            config.TaskF2(res),
+            config.Norm1(config.GradF2(res)),
+            nfcalls,
+            ngcalls,
+            nhcalls,
+        );
+        nfcalls = 0;
+        ngcalls = 0;
+        nhcalls = 0;
+    }
+
+    // --- Newton method ---
+    try config.stdout.print("\x1B[34mNewton\x1B[0m\n", .{});
+    {
+        const res = newton.Optimize(f1, g1, h1, kInitialPoint);
+
+        try LogResult(
+            res,
+            config.TaskF1(res),
+            config.Norm1(config.GradF1(res)),
+            nfcalls,
+            ngcalls,
+            nhcalls,
+        );
+        nfcalls = 0;
+        ngcalls = 0;
+        nhcalls = 0;
+    }
+
+    {
+        const res = newton.Optimize(f2, g2, h2, kInitialPoint);
 
         try LogResult(
             res,
