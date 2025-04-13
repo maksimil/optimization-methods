@@ -1,6 +1,7 @@
 const config = @import("config.zig");
 const nelder_mead = @import("nelder_mead.zig");
 const gradient_descent = @import("gradient_descent.zig");
+const conjugate_gradient = @import("conjugate_gradient.zig");
 
 const Scalar = config.Scalar;
 const Vec2 = config.Vec2;
@@ -90,6 +91,7 @@ pub fn main() !void {
     _ = h2;
 
     // --- Nelder-Mead method ---
+    try config.stdout.print("\x1B[34mNelder-Mead\x1B[0m\n", .{});
     {
         const res = nelder_mead.Optimize(f1, kInitialPoint);
 
@@ -123,6 +125,7 @@ pub fn main() !void {
     }
 
     // --- Gradient descent method ---
+    try config.stdout.print("\x1B[34mGradient descent\x1B[0m\n", .{});
     {
         const res = gradient_descent.Optimize(f1, g1, kInitialPoint);
 
@@ -141,6 +144,40 @@ pub fn main() !void {
 
     {
         const res = gradient_descent.Optimize(f2, g2, kInitialPoint);
+
+        try LogResult(
+            res,
+            config.TaskF2(res),
+            config.Norm1(config.GradF2(res)),
+            nfcalls,
+            ngcalls,
+            nhcalls,
+        );
+        nfcalls = 0;
+        ngcalls = 0;
+        nhcalls = 0;
+    }
+
+    // --- Conjugate gradient method ---
+    try config.stdout.print("\x1B[34mConjugate gradient\x1B[0m\n", .{});
+    {
+        const res = conjugate_gradient.Optimize(f1, g1, kInitialPoint);
+
+        try LogResult(
+            res,
+            config.TaskF1(res),
+            config.Norm1(config.GradF1(res)),
+            nfcalls,
+            ngcalls,
+            nhcalls,
+        );
+        nfcalls = 0;
+        ngcalls = 0;
+        nhcalls = 0;
+    }
+
+    {
+        const res = conjugate_gradient.Optimize(f2, g2, kInitialPoint);
 
         try LogResult(
             res,

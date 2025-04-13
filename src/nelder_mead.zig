@@ -157,5 +157,9 @@ pub fn Optimize(f: anytype, x0: Vec2) Vec2 {
         // ) catch unreachable;
     }
 
+    if (niter == kIterMax) {
+        config.stdout.print("iter max {d} was reached\n", .{kIterMax}) catch unreachable;
+    }
+
     return simplex[0];
 }
