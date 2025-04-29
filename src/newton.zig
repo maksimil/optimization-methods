@@ -6,20 +6,21 @@ const Vec2 = config.Vec2;
 const Mat2 = config.Mat2;
 
 const kGradTol: Scalar = 1e-8;
-const kIterMax: usize = 100_000;
+const kIterMax: usize = 10_000_000_000;
 const kMinEigen: Scalar = 1e-6;
 
 // add identity so that all eigenvalues are above kMinEigen
 fn ModifyHessian(h: Mat2) Mat2 {
-    const h00 = h[0][0];
-    const h11 = h[1][1];
-    const h01 = h[0][1];
-
-    const trace = h00 + h11;
-    const lambdamin = (trace - @sqrt(trace * trace + 4 * h01 * h01)) / 2;
-    const tau = @max(0, kMinEigen - lambdamin);
-
-    return .{ .{ h00 + tau, h01 }, .{ h01, h11 + tau } };
+    // const h00 = h[0][0];
+    // const h11 = h[1][1];
+    // const h01 = h[0][1];
+    //
+    // const trace = h00 + h11;
+    // const lambdamin = (trace - @sqrt(trace * trace + 4 * h01 * h01)) / 2;
+    // const tau = @max(0, kMinEigen - lambdamin);
+    //
+    // return .{ .{ h00 + tau, h01 }, .{ h01, h11 + tau } };
+    return h;
 }
 
 fn Solve2(h: Mat2, x: Vec2) Vec2 {

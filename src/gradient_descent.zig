@@ -7,7 +7,7 @@ const kArmijoC: Scalar = 1e-4;
 const kBacktrackingAlpha: Scalar = 0.5;
 const kAlphaThreshold: Scalar = 1e-12;
 const kGradTol: Scalar = 1e-8;
-const kIterMax: usize = 100_000;
+const kIterMax: usize = 100_000_000_000;
 
 // a + c*b
 pub fn FMulAdd(a: Vec2, b: Vec2, c: Scalar) Vec2 {
@@ -64,7 +64,7 @@ pub fn Optimize(f: anytype, grad: anytype, x0: Vec2) Vec2 {
 
         const ls = LineSearch(f, alpha, x, .{ -gx[0] / gx1, -gx[1] / gx1 }, gx);
 
-        alpha = ls.alpha;
+        alpha = ls.alpha * 1.1;
         x = ls.x;
 
         niter += 1;

@@ -5,7 +5,7 @@ const Vec2 = config.Vec2;
 const Scalar = config.Scalar;
 
 const kGradTol: Scalar = 1e-8;
-const kIterMax: usize = 100_000;
+const kIterMax: usize = 10_000_000_000;
 
 pub fn Optimize(f: anytype, grad: anytype, x0: Vec2) Vec2 {
     var x = x0;

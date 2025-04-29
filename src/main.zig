@@ -8,7 +8,7 @@ const Scalar = config.Scalar;
 const Vec2 = config.Vec2;
 const Mat2 = config.Mat2;
 
-const kInitialPoint: Vec2 = .{ 10, 20 };
+const kInitialPoint: Vec2 = .{ 100, 100 };
 
 fn LogResult(
     x: Vec2,
